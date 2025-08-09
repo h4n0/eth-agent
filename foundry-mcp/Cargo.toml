@@ -1,0 +1,26 @@
+[package]
+name = "foundry-mcp"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "foundry-mcp"
+path = "main.rs"
+
+[dependencies]
+rmcp = { version = "0.4.0", features = ["transport-io"] }
+hex = "0.4.3"
+serde_json = "1.0.142"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tokio = { version = "1.47.1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+anyhow = "1.0" 
+
+alloy = { version = "1.0", features = ["essentials"] }
+alloy-primitives = "1.0"
+alloy-provider = "1.0"
+alloy-signer-local = "1.0"
+alloy-rpc-types = "1.0"
+
+foundry-cli = { git = "https://github.com/foundry-rs/foundry.git", tag = "v1.3.0" }

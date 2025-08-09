@@ -1,0 +1,44 @@
+[package]
+name = "eth-mpc-agent"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = [
+    "agent",
+    "foundry-mcp"
+]
+
+[[bin]]
+name = "eth-agent"
+path = "agent/main.rs"
+
+[[bin]]
+name = "foundry-mcp"
+path = "foundry-mcp/main.rs"
+
+[dependencies]
+tokio = { version = "1.47.1", features = ["full", "signal"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+rmcp = { version = "0.4.0", features = ["server", "client", "transport-io", "macros", "transport-child-process"] }
+alloy = { version = "1.0", features = ["essentials"] }
+alloy-primitives = "1.0"
+alloy-provider = "1.0"
+alloy-signer-local = "1.0"
+alloy-rpc-types = "1.0"
+hex = "0.4"
+async-trait = "0.1"
+reqwest = { version = "0.12.11", features = ["json"] }
+
+rig-core = "0.14.0"
+
+foundry-cli = { git = "https://github.com/foundry-rs/foundry.git", tag = "v1.3.0" }
+
+
