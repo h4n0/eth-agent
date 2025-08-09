@@ -122,6 +122,7 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         Known addresses:
         Alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
         Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+        Eve: 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
         Known ERC20 tokens:
         - USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
@@ -193,6 +194,7 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         Known addresses:
         Alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
         Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+        Eve: 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
         Known ERC20 tokens:
         - USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
@@ -247,7 +249,7 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
             info!("Step: {}", step.step_number);
             match step.agent_name.as_str() {
                 "ethereum_agent" => {
-                    let response = match ethereum_agent.prompt(step.agent_prompt.clone() + "Previous steps: " + &memory.join("\n")).await {
+                    let response = match ethereum_agent.prompt(step.agent_prompt.clone() + "Previous steps: " + &memory.join("\n")).multi_turn(2).await {
                         Ok(response) => {
                             info!("Response: {}", response);
                             response

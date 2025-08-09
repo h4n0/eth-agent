@@ -14,8 +14,6 @@ use crate::mcp_client::FoundryMcpClient;
 pub enum ToolError {
     McpError(anyhow::Error),
     SerializationError(serde_json::Error),
-    InvalidAddress(String),
-    InvalidTransactionParams(String),
 }
 
 impl std::fmt::Display for ToolError {
@@ -23,8 +21,6 @@ impl std::fmt::Display for ToolError {
         match self {
             ToolError::McpError(e) => write!(f, "MCP client error: {}", e),
             ToolError::SerializationError(e) => write!(f, "Serialization error: {}", e),
-            ToolError::InvalidAddress(addr) => write!(f, "Invalid address: {}", addr),
-            ToolError::InvalidTransactionParams(params) => write!(f, "Invalid transaction parameters: {}", params),
         }
     }
 }
@@ -319,9 +315,6 @@ impl Tool for Erc20BalanceTool {
 #[derive(Deserialize)]
 pub struct WebSearchArgs {
     pub query: String,
-    pub count: Option<u32>,
-    pub country: Option<String>,
-    pub search_lang: Option<String>,
 }
 
 pub struct WebSearchTool {
@@ -364,18 +357,6 @@ impl Tool for WebSearchTool {
                     "query": {
                         "type": "string",
                         "description": "The query to search the web for"
-                    },
-                    "count": {
-                        "type": "number",
-                        "description": "Number of results to return (default: 20)"
-                    },
-                    "country": {
-                        "type": "string",
-                        "description": "Country code for localized results (e.g., 'us')"
-                    },
-                    "search_lang": {
-                        "type": "string",
-                        "description": "Search language (e.g., 'en')"
                     }
                 },
                 "required": ["query"]
@@ -399,6 +380,7 @@ pub struct McpToolSet {
     pub erc20_balance: Erc20BalanceTool,
 }
 
+#[allow(dead_code)]
 impl McpToolSet {
     pub fn new(client: Arc<Mutex<FoundryMcpClient>>, brave_search_api_key: String) -> Self {
         Self {
@@ -416,6 +398,7 @@ impl McpToolSet {
             "send_transaction".to_string(),
             "balance".to_string(),
             "web_search".to_string(),
+            "erc20_balance".to_string(),
         ]
     }
 
@@ -425,11 +408,14 @@ impl McpToolSet {
             self.send_transaction.definition("".to_string()).await,
             self.balance.definition("".to_string()).await,
             self.web_search.definition("".to_string()).await,
+            self.erc20_balance.definition("".to_string()).await,
         ]
     }
 }
 
+
 // Helper function to create a tool set with a new MCP client
+#[allow(dead_code)]
 pub async fn create_mcp_tool_set(brave_search_api_key: String) -> Result<McpToolSet> {
     let client = FoundryMcpClient::new().await?;
     let client = Arc::new(Mutex::new(client));

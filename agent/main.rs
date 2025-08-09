@@ -16,9 +16,7 @@ use types::*;
 use agent::EthAgent;
 use rig::providers::anthropic;
 
-const DEEPSEEK_CHAT_MODEL: &str = "deepseek-chat";
 const ANTHROPIC_MODEL: &str = "claude-3-5-haiku-20241022";
-const OPENAI_MODEL: &str = "gpt-4o-mini";
 const EVALUATION_THRESHOLD: u32 = 70;
 
 #[tokio::main]

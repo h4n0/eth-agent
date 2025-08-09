@@ -170,16 +170,19 @@ impl FoundryMcpClient {
         Ok(serde_json::to_value(tool_result)?)
     }
 
+    #[allow(dead_code)]
     pub async fn list_tools(&self) -> Result<serde_json::Value> {
         let tools = self.service.peer().list_tools(Default::default()).await?;
         Ok(serde_json::to_value(tools)?)
     }
 
+    #[allow(dead_code)]
     pub async fn cancel(self) -> Result<()> {
         self.service.cancel().await?;
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub async fn is_alive(&self) -> bool {
         // Check if the service is still connected by trying to list tools
         match self.service.peer().list_tools(Default::default()).await {
