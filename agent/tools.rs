@@ -262,6 +262,58 @@ impl Tool for GetContractCodeTool {
     }
 }
 
+// ERC20 Balance Tool
+
+#[derive(Deserialize)]
+pub struct Erc20BalanceArgs {
+    pub address: String,
+    pub token_address: String,
+}
+
+
+pub struct Erc20BalanceTool {
+    client: Arc<Mutex<FoundryMcpClient>>,
+}
+
+impl Erc20BalanceTool {
+    pub fn new(client: Arc<Mutex<FoundryMcpClient>>) -> Self {
+        Self { client }
+    }
+}
+
+impl Tool for Erc20BalanceTool {
+    const NAME: &'static str = "erc20_balance";
+    type Error = ToolError;
+    type Args = Erc20BalanceArgs;
+    type Output = serde_json::Value;
+
+    async fn definition(&self, _prompt: String) -> ToolDefinition {
+        ToolDefinition {
+            name: "erc20_balance".to_string(),
+            description: "Get the balance of an ERC20 token for an address".to_string(),
+            parameters: json!({
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string",
+                        "description": "The address to check the balance of"
+                    },
+                    "token_address": {
+                        "type": "string",
+                        "description": "The address of the ERC20 token"
+                    }
+                },
+                "required": ["address", "token_address"]
+            })
+        }
+    }
+
+    async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
+        let client = self.client.lock().await;
+        let result = client.erc20_balance(&args.address, &args.token_address).await?;
+        Ok(result)
+    }
+}
 // Web Search Tool
 
 #[derive(Deserialize)]
@@ -344,6 +396,7 @@ pub struct McpToolSet {
     pub send_transaction: SendTransactionTool,
     pub balance: BalanceTool,
     pub web_search: WebSearchTool,
+    pub erc20_balance: Erc20BalanceTool,
 }
 
 impl McpToolSet {
@@ -353,6 +406,7 @@ impl McpToolSet {
             send_transaction: SendTransactionTool::new(client.clone()),
             balance: BalanceTool::new(client.clone()),
             web_search: WebSearchTool::new(brave_search_api_key),
+            erc20_balance: Erc20BalanceTool::new(client.clone()),
         }
     }
 

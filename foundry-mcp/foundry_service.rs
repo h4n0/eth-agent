@@ -1,4 +1,4 @@
-use alloy::{serde::WithOtherFields};
+use alloy::serde::WithOtherFields;
 use alloy_provider::{network::AnyNetwork, Provider, RootProvider};
 use rmcp::{
     schemars, tool, tool_router, tool_handler,
@@ -8,11 +8,22 @@ use rmcp::{
 };
 use alloy_primitives::{Address, U256};
 use alloy_rpc_types::eth::TransactionRequest;
+use alloy::sol;
 use std::str::FromStr;
 use hex;
 use std::future::Future;
 use serde_json::json;
 use foundry_cli::{opts::RpcOpts, utils::LoadConfig};
+
+sol! {
+    #[sol(rpc)]
+    contract ERC20 {
+        function balanceOf(address account) external view returns (uint256);
+        function decimals() external view returns (uint8);   // optional
+        function symbol() external view returns (string);    // optional
+    }
+}
+
 
 #[derive(Clone)]
 pub struct FoundryService {
@@ -27,11 +38,18 @@ pub struct BalanceRequest {
 }
 
 #[derive(Debug, schemars::JsonSchema, serde::Deserialize, serde::Serialize)]
+pub struct Erc20BalanceRequest {
+    #[schemars(description = "The address of the account to check the balance of")]
+    pub address: String,
+    #[schemars(description = "The address of the ERC20 token")]
+    pub token_address: String,
+}
+
+#[derive(Debug, schemars::JsonSchema, serde::Deserialize, serde::Serialize)]
 pub struct ValidateAddressRequest {
     #[schemars(description = "The Ethereum address to validate")]
     pub address: String,
 }
-
 #[derive(Debug, schemars::JsonSchema, serde::Deserialize, serde::Serialize)]
 pub struct SendTransactionRequest {
     #[schemars(description = "Sender address")]
@@ -273,6 +291,33 @@ impl FoundryService {
             });
             serde_json::to_string(&result).unwrap_or_else(|_| "Error serializing response".to_string())
         }
+    }
+
+    #[tool(description = "Get the given ERC20 token balance of an account")]
+    pub async fn erc20_balance(
+        &self,
+        Parameters(request): Parameters<Erc20BalanceRequest>,
+    ) -> String {
+
+        let token_address = Address::from_str(&request.token_address).unwrap();
+        let account_address = Address::from_str(&request.address).unwrap();
+
+        let erc20 = ERC20::new(token_address, self.foundry_provider.clone());
+
+        // FIXME: error handling
+        let balance = erc20.balanceOf(account_address).call().await.unwrap().to_string();
+        let decimals = erc20.decimals().call().await.unwrap();
+        let symbol = erc20.symbol().call().await.unwrap();
+
+        let result = json!({
+            "success": true,
+            "token_address": request.token_address,
+            "account_address": request.address,
+            "balance": balance,
+            "decimals": decimals,
+            "symbol": symbol
+        });
+        serde_json::to_string(&result).unwrap_or_else(|_| "Error serializing response".to_string())
     }
 }
 

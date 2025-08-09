@@ -2,7 +2,7 @@ use std::env;
 use std::collections::HashMap;
 use std::io::{self, Write};
 use anyhow::Result;
-use tracing::{info, error};
+use tracing::{error, info, Level};
 use tracing_subscriber;
 
 // Import modules
@@ -11,6 +11,7 @@ mod mcp_client;
 mod agent;
 mod tools;
 
+use tracing_subscriber::filter::EnvFilter;
 use types::*;
 use agent::EthAgent;
 use rig::providers::anthropic;
@@ -18,13 +19,16 @@ use rig::providers::anthropic;
 const DEEPSEEK_CHAT_MODEL: &str = "deepseek-chat";
 const ANTHROPIC_MODEL: &str = "claude-3-5-haiku-20241022";
 const OPENAI_MODEL: &str = "gpt-4o-mini";
-const EVALUATION_THRESHOLD: u32 = 80;
+const EVALUATION_THRESHOLD: u32 = 70;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize logging
+    let filter = EnvFilter::new("info,rig=warn,serve_inner=warn,rmcp::service=warn");
+
     tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
+        .with_max_level(Level::INFO)
+        .with_env_filter(filter)
         .init();
     info!("Starting ETH Agent with MCP-based Foundry integration");
 

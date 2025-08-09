@@ -1,6 +1,6 @@
 use crate::{mcp_client::FoundryMcpClient, tools::*, types::*};
 use anyhow::Result;
-use tracing::{info, error};
+use tracing::{debug, error, info};
 use uuid::Uuid;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -100,6 +100,8 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
             ]
         }}
 
+        DO NOT output anything else than the JSON object.
+
 
         Sub-agents:
         - ethereum_agent: An agent that can send transactions to the Ethereum network, with the following tools:
@@ -107,6 +109,7 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
             - validate_address: Validate an Ethereum address
             - balance: Get the balance of an Ethereum address
             - get_contract_code: Get the contract code of an Ethereum address
+            - erc20_balance: Get the balance of an ERC20 token for an address
         - search_agent: An agent that can search the web for information
             - search: Search the web for information
         
@@ -120,6 +123,10 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         Alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
         Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 
+        Known ERC20 tokens:
+        - USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+        - USDT: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+        - DAI: 0x6B175474E89094C44Da98b954EedeAC495271d0F
         "#;
 
         let planner_client = self.provider_client.agent(&self.planning_model)
@@ -142,10 +149,12 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
 
         let plan_response = prompt_request.await?;
 
-        info!("Plan response: {}", plan_response.clone());
+        debug!("Plan response: {}", plan_response.clone());
 
         let actual_plan = if plan_response.contains("```json") {
             // Keep the content between ```json and ``` from the plan response
+            // Reason: Claude models output some extra text before and after the json object, so we need to remove it
+            // TODO: This is a hack, structured output should be implemented in the future
             plan_response.split("```json").nth(1).unwrap().split("```").nth(0).unwrap().to_string()
 
         } else {
@@ -171,17 +180,24 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         const ETHEREUM_PREAMBLE: &str = "
         You are a helpful assistant that creates execution plans for Ethereum transactions.
 
+        The output should be succinct and to the point. 
+
 
         Tools:
         - send_transaction: Send a transaction to the Ethereum network
         - balance: Get the balance of an Ethereum address
         - validate_address: Validate an Ethereum address
         - get_contract_code: Get the contract code of an Ethereum address
+        - erc20_balance: Get the balance of an ERC20 token for an address
 
         Known addresses:
         Alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
         Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
 
+        Known ERC20 tokens:
+        - USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+        - USDT: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+        - DAI: 0x6B175474E89094C44Da98b954EedeAC495271d0F
         ";
 
         const SEARCH_PREAMBLE: &str = "
@@ -214,6 +230,7 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         .tool(BalanceTool::new(client.clone()))
         .tool(GetContractCodeTool::new(client.clone()))
         .tool(ValidateAddressTool::new(client.clone()))
+        .tool(Erc20BalanceTool::new(client.clone()))
         .temperature(0.7)
         .build();
 
@@ -277,7 +294,6 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
 
 
             if let Ok(evaluation) = self.evaluate_result(&prompt, &step.agent_prompt, &memory.last().unwrap().clone()).await {
-                info!("Evaluation: {:?}", evaluation);
 
                 if evaluation.score < self.evaluation_threshold {
                     error!("Evaluation score is below threshold: {}, returning error", evaluation.score);
@@ -319,6 +335,9 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
             "score": 0-100,
             "reasoning": "Reasoning for the score"
         }}
+
+        DO NOT output anything else than the JSON object.
+
         "#;
         let evaluation_client = self.provider_client.agent(&self.evaluation_model)
         .preamble(EVALUATION_PREAMBLE)

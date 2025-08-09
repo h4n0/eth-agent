@@ -2,6 +2,19 @@
 
 A modular Ethereum agent system that uses the Model Context Protocol (MCP) to integrate with Foundry for blockchain interactions.
 
+## How to Build
+
+### Prerequisites
+- The `rustc` must be updated to 1.88 or later due to `rig` and `foundry` dependencies
+
+### Build
+
+## Things to do
+- Error handling
+- Structured output to guarantee a stable output format
+- Code agent to complete complicated tasks 
+- Prompt engineering
+
 ## Features
 
 - **Multi-Step Agent Loop**: Advanced agent with planning, execution, and evaluation phases

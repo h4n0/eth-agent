@@ -5,7 +5,7 @@ use rmcp::{
     transport::TokioChildProcess,
 };
 use tokio::process::Command;
-use tracing::info;
+use tracing::{debug, info};
 use std::future::Future;
 
 // The default foundry-mcp binary
@@ -72,7 +72,7 @@ impl FoundryMcpClient {
             .map_err(|e| anyhow::anyhow!("Failed to create transport: {}", e))?;
         let service = SimpleClientService.serve(transport).await?;
 
-        info!("Connected to server: {:#?}", service.peer().peer_info());
+        debug!("Connected to server: {:#?}", service.peer().peer_info());
 
         let client = Self { service };
         
@@ -87,7 +87,7 @@ impl FoundryMcpClient {
             })
             .await?;
         
-        info!("Balance tool result: {tool_result:#?}");
+        debug!("Balance tool result: {tool_result:#?}");
         
         Ok(serde_json::to_value(tool_result)?)
     }
@@ -100,7 +100,7 @@ impl FoundryMcpClient {
             })
             .await?;
         
-        info!("Validate address tool result: {tool_result:#?}");
+        debug!("Validate address tool result: {tool_result:#?}");
         
         Ok(serde_json::to_value(tool_result)?)
     }
@@ -139,7 +139,7 @@ impl FoundryMcpClient {
             })
             .await?;
         
-        info!("Send transaction tool result: {tool_result:#?}");
+        debug!("Send transaction tool result: {tool_result:#?}");
         
         Ok(serde_json::to_value(tool_result.content)?)
     }
@@ -152,7 +152,20 @@ impl FoundryMcpClient {
             })
             .await?;
 
-        info!("Get contract code tool result: {tool_result:#?}");
+        debug!("Get contract code tool result: {tool_result:#?}");
+        
+        Ok(serde_json::to_value(tool_result)?)
+    }
+
+    pub async fn erc20_balance(&self, address: &str, token_address: &str) -> Result<serde_json::Value> {
+        let tool_result = self.service.peer()
+            .call_tool(CallToolRequestParam {
+                name: "erc20_balance".into(),
+                arguments: serde_json::json!({ "address": address, "token_address": token_address }).as_object().cloned(),
+            })
+            .await?;
+
+        debug!("ERC20 balance tool result: {tool_result:#?}");
         
         Ok(serde_json::to_value(tool_result)?)
     }
