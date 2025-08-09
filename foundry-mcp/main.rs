@@ -2,7 +2,7 @@ use std::error::Error;
 mod foundry_service;
 use foundry_service::FoundryService;
 use rmcp::{ServiceExt, transport::stdio};
-use tracing_subscriber::{self, EnvFilter};
+use tracing_subscriber::{self};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

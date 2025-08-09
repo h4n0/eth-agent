@@ -13,9 +13,7 @@ mod tools;
 
 use types::*;
 use agent::EthAgent;
-use rig::providers::openai;
 use rig::providers::anthropic;
-use rig::providers::deepseek;
 
 const DEEPSEEK_CHAT_MODEL: &str = "deepseek-chat";
 const ANTHROPIC_MODEL: &str = "claude-3-5-haiku-20241022";

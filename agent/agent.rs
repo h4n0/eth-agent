@@ -1,11 +1,11 @@
 use crate::{mcp_client::FoundryMcpClient, tools::*, types::*};
 use anyhow::Result;
-use tracing::{info, warn, error};
+use tracing::{info, error};
 use uuid::Uuid;
-use std::{f64::consts::E, sync::Arc};
+use std::sync::Arc;
 use tokio::sync::Mutex;
 
-use rig::{client::{CompletionClient, ProviderClient}, completion::{Completion, Prompt}};
+use rig::{client::{CompletionClient, ProviderClient}, completion::Prompt};
 
 
 pub struct EthAgent<T: CompletionClient + ProviderClient + Send + Sync> {

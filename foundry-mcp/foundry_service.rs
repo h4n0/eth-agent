@@ -4,13 +4,10 @@ use rmcp::{
     schemars, tool, tool_router, tool_handler,
     handler::server::{router::tool::ToolRouter, tool::Parameters},
     model::{ServerCapabilities, ServerInfo},
-    ErrorData as McpError,
     ServerHandler,
 };
 use alloy_primitives::{Address, U256};
-use alloy_signer_local::PrivateKeySigner;
 use alloy_rpc_types::eth::TransactionRequest;
-use std::{env, hash::Hash};
 use std::str::FromStr;
 use hex;
 use std::future::Future;

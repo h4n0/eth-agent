@@ -1,11 +1,11 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use serde_json::json;
 use anyhow::Result;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use rig::{
     completion::ToolDefinition,
-    tool::{ToolSet, Tool},
+    tool::Tool,
 };
 use crate::mcp_client::FoundryMcpClient;
 
@@ -83,7 +83,7 @@ impl Tool for ValidateAddressTool {
     }
 
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
-        let mut client = self.client.lock().await;
+        let client = self.client.lock().await;
         let result = client.validate_address(&args.address).await?;
         Ok(result)
     }
@@ -154,7 +154,7 @@ impl Tool for SendTransactionTool {
     }
 
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
-        let mut client = self.client.lock().await;
+        let client = self.client.lock().await;
         let result = client.send_transaction(
             &args.from,
             &args.to,
@@ -207,7 +207,7 @@ impl Tool for BalanceTool {
     }
 
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
-        let mut client = self.client.lock().await;
+        let client = self.client.lock().await;
         let result = client.balance(&args.address).await?;
         Ok(result)
     }
@@ -256,7 +256,7 @@ impl Tool for GetContractCodeTool {
 
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
 
-        let mut client = self.client.lock().await;
+        let client = self.client.lock().await;
         let result = client.get_contract_code(&args.address).await?;
         Ok(result)
     }
