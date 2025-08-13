@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::io::{self, Write};
 use anyhow::Result;
 use tracing::{error, info, Level};
-use tracing_subscriber;
+use tracing_subscriber::filter::EnvFilter;
 
 // Import modules
 mod types;
@@ -22,8 +22,11 @@ const EVALUATION_THRESHOLD: u32 = 70;
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize logging
+    let filter = EnvFilter::new("info,rig=warn,serve_inner=warn,rmcp::service=warn");
+
     tracing_subscriber::fmt()
         .with_max_level(Level::INFO)
+        .with_env_filter(filter)
         .init();
     info!("Starting ETH Agent with MCP-based Foundry integration");
 
