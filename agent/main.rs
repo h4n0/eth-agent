@@ -11,7 +11,7 @@ mod mcp_client;
 mod agent;
 mod tools;
 
-use tracing_subscriber::filter::EnvFilter;
+
 use types::*;
 use agent::EthAgent;
 use rig::providers::anthropic;
@@ -22,11 +22,8 @@ const EVALUATION_THRESHOLD: u32 = 70;
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize logging
-    let filter = EnvFilter::new("info,rig=warn,serve_inner=warn,rmcp::service=warn");
-
     tracing_subscriber::fmt()
         .with_max_level(Level::INFO)
-        .with_env_filter(filter)
         .init();
     info!("Starting ETH Agent with MCP-based Foundry integration");
 

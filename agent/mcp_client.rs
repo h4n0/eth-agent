@@ -8,9 +8,6 @@ use tokio::process::Command;
 use tracing::{debug, info};
 use std::future::Future;
 
-// The default foundry-mcp binary
-const DEFAULT_FOUNDRY_MCP_BINARY: &str = "./foundry-mcp";
-
 // Simple service implementation for the client
 #[derive(Debug, Clone)]
 struct SimpleClientService;
@@ -60,17 +57,22 @@ pub struct FoundryMcpClient {
 
 impl FoundryMcpClient {
     pub async fn new() -> Result<Self> {
-        // Get the binary path from environment or use default
-        let binary_path = std::env::var("FOUNDRY_MCP_BINARY")
-            .unwrap_or_else(|_| DEFAULT_FOUNDRY_MCP_BINARY.to_string());
-            
-        info!("Starting foundry-mcp server from: {}", binary_path);
+        info!("Starting foundry-mcp server as child process");
+        
+        // Use cargo run to start the foundry-mcp server as a child process
+        let mut command = Command::new("cargo");
+        command.args(["run", "--bin", "foundry-mcp"]);
+        
+        // Suppress server output by redirecting stderr to null
+        // (stdout is used for MCP communication, so we keep that)
+        command.stderr(std::process::Stdio::null());
         
         // Create the service using TokioChildProcess
-        let command = Command::new(binary_path);
         let transport = TokioChildProcess::new(command)
-            .map_err(|e| anyhow::anyhow!("Failed to create transport: {}", e))?;
-        let service = SimpleClientService.serve(transport).await?;
+            .map_err(|e| anyhow::anyhow!("Failed to start foundry-mcp server: {}", e))?;
+            
+        let service = SimpleClientService.serve(transport).await
+            .map_err(|e| anyhow::anyhow!("Failed to establish MCP connection: {}", e))?;
 
         debug!("Connected to server: {:#?}", service.peer().peer_info());
 

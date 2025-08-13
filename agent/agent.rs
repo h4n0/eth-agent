@@ -89,16 +89,16 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         You are a helpful assistant that creates execution plans for Ethereum transactions.
 
         The output MUST be a valid JSON object in the following format:
-        {{
+        {
             "number_of_steps": 1-10,
             "steps": [
-                {{
+                {
                     "step_number": 1-10,
                     "agent_name": "ethereum_agent",
-                    "agent_prompt": "Prompt for the agent to execute",
-                }}
+                    "agent_prompt": "Prompt for the agent to execute"
+                }
             ]
-        }}
+        }
 
         DO NOT output anything else than the JSON object.
 
