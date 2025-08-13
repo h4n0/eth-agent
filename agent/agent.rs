@@ -118,11 +118,12 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         - Send 0.001 ETH from Alice to Bob
         - What is the balance of Alice?
         - What is the current price of ETH?
+        - What is the USDC balance of Vitalik?
 
         Known addresses:
         Alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
         Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
-        Eve: 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+        Vitalik: 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
         Known ERC20 tokens:
         - USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
@@ -194,7 +195,7 @@ impl<T: CompletionClient + ProviderClient + Send + Sync> EthAgent<T> {
         Known addresses:
         Alice: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
         Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
-        Eve: 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
+        Vitalik: 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045
 
         Known ERC20 tokens:
         - USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
