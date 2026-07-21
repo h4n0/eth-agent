@@ -9,3 +9,5 @@ This follow-up documentation line triggers a second Check Run after the hosted s
 This final documentation-only line verifies the bounded live assessment turn after the worker restart.
 
 This line verifies that documentation-only scope remains a limitation rather than a fabricated production finding.
+
+This final line runs after the explicitly confirmed Render deployment of the evidence-only adapter.
